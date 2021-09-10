@@ -68,6 +68,17 @@ func getCaller() *runtime.Frame {
 	}
 	return nil
 }
+func Info(v ...interface{}) { defaultLogger.Info(v...) }
+
+func Trace(v ...interface{}) { defaultLogger.Trace(v...) }
+
+func Debug(v ...interface{}) { defaultLogger.Debug(v...) }
+
+func Warn(v ...interface{}) { defaultLogger.Warn(v...) }
+
+func Error(v ...interface{}) { defaultLogger.Error(v...) }
+
+func Panic(v ...interface{}) { defaultLogger.Panic(v...) }
 
 func Infof(format string, v ...interface{}) { defaultLogger.Infof(format, v...) }
 
@@ -135,47 +146,87 @@ func (l *Logger) SetPrefix(prefix string) {
 	l.prefix = prefix
 }
 
+func (l *Logger) Info(v ...interface{}) {
+	if l.level < InfoLevel {
+		return
+	}
+	l.write(InfoLevel, nil, v...)
+}
+
+func (l *Logger) Trace(v ...interface{}) {
+	if l.level < TraceLevel {
+		return
+	}
+	l.write(TraceLevel, nil, v...)
+}
+
+func (l *Logger) Debug(v ...interface{}) {
+	if l.level < DebugLevel {
+		return
+	}
+	l.write(DebugLevel, nil, v...)
+}
+
+func (l *Logger) Warn(v ...interface{}) {
+	if l.level < WarnLevel {
+		return
+	}
+	l.write(WarnLevel, nil, v...)
+}
+
+func (l *Logger) Error(v ...interface{}) {
+	if l.level < ErrorLevel {
+		return
+	}
+	l.write(ErrorLevel, nil, v...)
+}
+
+func (l *Logger) Panic(v ...interface{}) {
+	l.write(PanicLevel, nil, v...)
+	os.Exit(-1)
+}
+
 func (l *Logger) Infof(format string, v ...interface{}) {
 	if l.level < InfoLevel {
 		return
 	}
-	l.write(InfoLevel, format, v...)
+	l.write(InfoLevel, &format, v...)
 }
 
 func (l *Logger) Tracef(format string, v ...interface{}) {
 	if l.level < TraceLevel {
 		return
 	}
-	l.write(TraceLevel, format, v...)
+	l.write(TraceLevel, &format, v...)
 }
 
 func (l *Logger) Debugf(format string, v ...interface{}) {
 	if l.level < DebugLevel {
 		return
 	}
-	l.write(DebugLevel, format, v...)
+	l.write(DebugLevel, &format, v...)
 }
 
 func (l *Logger) Warnf(format string, v ...interface{}) {
 	if l.level < WarnLevel {
 		return
 	}
-	l.write(WarnLevel, format, v...)
+	l.write(WarnLevel, &format, v...)
 }
 
 func (l *Logger) Errorf(format string, v ...interface{}) {
 	if l.level < ErrorLevel {
 		return
 	}
-	l.write(ErrorLevel, format, v...)
+	l.write(ErrorLevel, &format, v...)
 }
 
 func (l *Logger) Panicf(format string, v ...interface{}) {
-	l.write(PanicLevel, format, v...)
+	l.write(PanicLevel, &format, v...)
 	os.Exit(-1)
 }
 
-func (l *Logger) write(level Level, format string, v ...interface{}) {
+func (l *Logger) write(level Level, format *string, v ...interface{}) {
 	frame := getCaller()
 	temp := fmt.Sprintf("[%s] %5s %s: [%s:%d] [%s]",
 		time.Now().Format("2006-01-02 15:04:05.000"),
@@ -185,5 +236,9 @@ func (l *Logger) write(level Level, format string, v ...interface{}) {
 		frame.Line,
 		frame.Function,
 	)
-	fmt.Fprintf(l.output, "%s %s\n", temp, fmt.Sprintf(format, v...))
+	if format == nil {
+		fmt.Fprintf(l.output, "%s %s\n", temp, fmt.Sprint(v...))
+		return
+	}
+	fmt.Fprintf(l.output, "%s %s\n", temp, fmt.Sprintf(*format, v...))
 }

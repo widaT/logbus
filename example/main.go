@@ -15,4 +15,6 @@ func main() {
 	for _, l := range logs {
 		l.Debugf("aaaaaaaaa")
 	}
+	logbus.Info("info aaaaaa")
+	logbus.Panic("somthing wrong")
 }
