@@ -110,6 +110,23 @@ func GetLoggers() map[string]*Logger {
 	return loggers
 }
 
+func StringToLevel(level string) Level {
+	l := DebugLevel
+	switch level {
+	case "trace":
+		l = TraceLevel
+	case "debug":
+		l = DebugLevel
+	case "info":
+		l = InfoLevel
+	case "warn":
+		l = WarnLevel
+	case "error":
+		l = ErrorLevel
+	}
+	return l
+}
+
 func (l Level) String() string {
 	switch l {
 	case TraceLevel:
