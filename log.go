@@ -56,6 +56,14 @@ func getPackageName(f string) string {
 	return f
 }
 
+func getFuncName(f string) string {
+	n := strings.LastIndex(f, "/")
+	if n == -1 {
+		return f
+	}
+	return f[n+1:]
+}
+
 func getCaller() *runtime.Frame {
 	pcs := make([]uintptr, maximumCallerDepth)
 	depth := runtime.Callers(minimumCallerDepth, pcs)
@@ -251,7 +259,7 @@ func (l *Logger) write(level Level, format *string, v ...interface{}) {
 		l.prefix,
 		path.Base(frame.File),
 		frame.Line,
-		frame.Function,
+		getFuncName(frame.Function),
 	)
 	if format == nil {
 		fmt.Fprintf(l.output, "%s %s\n", temp, fmt.Sprint(v...))
